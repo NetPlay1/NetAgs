@@ -1,0 +1,28 @@
+$fg-color: #{"@theme_fg_color"};
+$bg-color: #{"@theme_bg_color"};
+$accent-color: #{"@theme_selected_bg_color"};
+$radius: 7px;
+
+window.OSD {
+    box.OSD {
+        background-color: $bg-color;
+        border-radius: $radius;
+        padding: 13px 16px;
+        margin: 13px;
+        box-shadow: 3px 3px 7px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    label {
+        font-size: 1.4rem;
+    }
+
+    levelbar {
+        trough {
+            margin: 1px 0.6rem;
+        }
+
+        block {
+            min-height: 2rem;
+        }
+    }
+}

@@ -1,0 +1,97 @@
+@use "sass:string";
+@import "OSD.scss";
+// https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
+$fg-color: #{"@theme_fg_color"};
+$bg-color: #{"@theme_bg_color"};
+$accent-color: #{"@theme_selected_bg_color"};
+$radius: 7px;
+
+@function gtkalpha($c, $a) {
+    @return string.unquote("alpha(#{$c},#{$a})");
+}
+
+window.Bar {
+    background: transparent;
+    color: $fg-color;
+    font-weight: bold;
+    margin: 0px;
+
+    > centerbox {
+        background: transparent;
+        border-radius: $radius;
+        margin: 0px;
+    }
+
+    button {
+        border-radius: $radius;
+    }
+
+    .Battery-box {
+        margin-right: 10px;
+    }
+
+    .Worksapces-box {
+        button {
+            padding-right: 7px;
+            padding-left: 7px;
+        }
+    }
+
+    .Worksapces-button {
+        border-color: $accent-color;
+        border-radius: $radius;
+    }
+
+    .Worksapces-button-hover {
+        background-color: gtkalpha($accent-color, 0.75);
+    }
+
+    .Tray-contain {
+        /* background-color: rgba(black, 0.3); */
+        border-radius: $radius;
+        margin-right: 10px;
+        margin-left: 10px;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .Tray-item {
+        border-radius: 0px;
+
+        button {
+        }
+    }
+
+    .Clients-box {
+        margin-left: 10px;
+    }
+
+    .Clients-item {
+        background: transparent;
+    }
+
+    .Clients-item :hover {
+        background-color: gtkalpha($accent-color, 0.25);
+        border-radius: $radius;
+    }
+
+    .Clients-item-focused {
+        background-color: gtkalpha($accent-color, 0.45);
+    }
+}
+
+.RunBar-box {
+    background-color: gtkalpha($bg-color, 0.95);
+    border-radius: $radius;
+}
+
+.RunBar-button-description {
+    color: gray;
+}
+.bluetooth-connected {
+    background-color: $accent-color;
+}
+
+.audio-speaker-selected {
+    background: $accent-color;
+}
