@@ -10,7 +10,7 @@ function Bluetooth() {
   return (
     <menubutton>
       <image iconName={"network-bluetooth-symbolic"} />
-      <popover>
+      <popover hasArrow={false}>
         <box vertical>
           <label label={"devices"} />
           {bind(bluetooth, "devices").as((devices) =>
@@ -39,7 +39,15 @@ function Bluetooth() {
                 >
                   <box>
                     <image iconName={bind(device, "icon")} />
-                    <label label={bind(device, "name")} />
+                    <label label={bind(device, "name")} hexpand />
+                    <label
+                      hexpand
+                      halign={Gtk.Align.END}
+                      visible={bind(device, "connected")}
+                      label={bind(device, "batteryPercentage").as(
+                        (bat) => `${Math.floor(bat * 100)}%`,
+                      )}
+                    />
                   </box>
                 </button>
               );

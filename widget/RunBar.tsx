@@ -1,5 +1,5 @@
 import { App, Astal, Gtk, Gdk, hook } from "astal/gtk4";
-import { bind, Binding, Variable } from "astal";
+import { bind, Binding, execAsync, Variable } from "astal";
 import AstalApps from "gi://AstalApps";
 
 const Apps = new AstalApps.Apps({
@@ -53,7 +53,6 @@ function filterList(text: string) {
   AppButtons.forEach((appbutton) => {
     let appName = appbutton.name.toLowerCase();
     let appDescription = appbutton.tooltipText?.toLowerCase();
-    print(appbutton);
     if (appName.includes(text)) return appbutton.set_visible(true);
     appbutton.set_visible(false);
   });
@@ -84,15 +83,27 @@ function RunBar() {
 
             hook(self, App, "window-toggled", () => {
               self.text = "";
+              self.grab_focus();
             });
           }}
-          onNotifyText={(self) => filterList(self.text?.toLowerCase())}
+          onNotifyText={(self) => {
+            if (self.text.includes(">")) return;
+            filterList(self.text?.toLowerCase());
+          }}
+          onActivate={(self) => {
+            if (self.text[0]?.includes(">")) {
+              let command = self.text.slice(1);
+              return execAsync(command)
+                .catch((e) => print("error: " + e))
+                .then(() => hide());
+            }
+          }}
         />
         <Gtk.ScrolledWindow
           vexpand
           hexpand
           widthRequest={500}
-          heightRequest={550}
+          heightRequest={500}
         >
           <box
             vexpand

@@ -27,7 +27,7 @@ window.Bar {
     }
 
     .Battery-box {
-        margin-right: 10px;
+        /* margin-right: 10px; */
     }
 
     .Worksapces-box {
@@ -46,13 +46,12 @@ window.Bar {
         background-color: gtkalpha($accent-color, 0.75);
     }
 
-    .Tray-contain {
+    .Tray-container {
         /* background-color: rgba(black, 0.3); */
         border-radius: $radius;
         margin-right: 10px;
         margin-left: 10px;
         padding-left: 2px;
-        padding-right: 2px;
     }
 
     .Tray-item {

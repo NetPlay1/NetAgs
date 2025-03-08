@@ -11,10 +11,37 @@ function Audio() {
   let audio = wp!.audio;
   if (!defualtSpeaker) return <></>;
   let OpenReaveler = Variable(false);
+
+  const SpeakerList = () => (
+    <box vertical>
+      {bind(audio, "speakers").as((speakers) =>
+        speakers.map((speaker) => (
+          <button
+            hexpand
+            label={speaker.name || "default"}
+            onClicked={(self) => speaker.set_is_default(true)}
+            setup={(self) => {
+              if (speaker.isDefault) {
+                self.cssClasses = ["audio-speaker-selected"];
+              }
+
+              hook(self, speaker, "notify::isDefault", () => {
+                self.cssClasses = ["audio-speaker-selected"];
+                if (!speaker.isDefault) {
+                  self.cssClasses = [];
+                }
+              });
+            }}
+          />
+        )),
+      )}
+    </box>
+  );
+
   return (
     <menubutton>
       <image iconName={bind(defualtSpeaker, "volumeIcon")} />
-      <popover>
+      <popover hasArrow={false}>
         <box vertical widthRequest={300}>
           <label label="main volume" hexpand />
           <slider
@@ -47,36 +74,16 @@ function Audio() {
             }),
           )}
           <button
-            label={"choose speaker"}
+            label={bind(OpenReaveler).as((open) => {
+              return open ? "⌃" : "⌄";
+            })}
             onClicked={() => OpenReaveler.set(!OpenReaveler.get())}
           />
           <revealer
             revealChild={OpenReaveler()}
             onDestroy={() => OpenReaveler.drop()}
           >
-            {bind(audio, "speakers").as((speakers) =>
-              speakers.map((speaker) => {
-                return (
-                  <button
-                    hexpand
-                    label={speaker.name || "defualt"}
-                    onClicked={(self) => speaker.set_is_default(true)}
-                    setup={(self) => {
-                      if (speaker.is_default) {
-                        return (self.cssClasses = ["audio-speaker-selected"]);
-                      }
-
-                      hook(self, speaker, "notify::is-default", () => {
-                        if (speaker.is_default) {
-                          return (self.cssClasses = ["audio-speaker-selected"]);
-                        }
-                        self.cssClasses = [];
-                      });
-                    }}
-                  />
-                );
-              }),
-            )}
+            <SpeakerList />
           </revealer>
         </box>
       </popover>

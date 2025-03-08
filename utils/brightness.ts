@@ -23,8 +23,8 @@ export default class Brightness extends GObject.Object {
   }
 
   set screen(percent) {
-    if (percent < 0) percent = 0;
-
+    if (percent < 0) percent = 0.2;
+    if (percent == 0) percent = 0.2;
     if (percent > 1) percent = 1;
 
     execAsync(`brightnessctl set ${Math.floor(percent * 100)}% -q`).then(() => {

@@ -5,51 +5,84 @@ import AstalBattery from "gi://AstalBattery";
 import AstalHyprland from "gi://AstalHyprland";
 import AstalApps from "gi://AstalApps";
 import Icons from "../utils/icons";
-import Pango from "gi://Pango";
 import Audio from "./bar-widgets/Audio";
+import Brightness from "../utils/brightness";
 import Bluetooth from "./bar-widgets/Bluetooth";
-import QuickSettings from "./bar-widgets/QuickSettings";
 const time = Variable("").poll(1000, "date +'%H:%M - %a'");
 const Applications = AstalApps.Apps.new();
 
 function Battery() {
   const battery = AstalBattery.get_default();
+  const brightness = Brightness.get_default();
 
   return (
-    <box
-      cssClasses={["Battery-box"]}
-      visible={bind(battery, "isPresent")}
-      tooltipMarkup={bind(battery, "time_to_empty").as(
-        (time) =>
-          `hr: ${Math.floor(time / 60.0 / 60.0)}, min: ${Math.floor(time % 60.0)} left`,
-      )}
-    >
-      <image iconName={bind(battery, "batteryIconName")} />
-      <label
-        label={bind(battery, "percentage").as((p) => `${Math.floor(p * 100)}%`)}
-      />
-    </box>
+    <menubutton>
+      <box
+        cssClasses={["Battery-box"]}
+        visible={bind(battery, "isPresent")}
+        tooltipMarkup={bind(battery, "time_to_empty").as(
+          (time) =>
+            `hr: ${Math.floor(time / 60.0 / 60.0)}, min: ${Math.floor(time % 60.0)} left`,
+        )}
+      >
+        <image iconName={bind(battery, "batteryIconName")} />
+        <label
+          label={bind(battery, "percentage").as(
+            (p) => `${Math.floor(p * 100)}%`,
+          )}
+        />
+      </box>
+      <popover>
+        <box vertical>
+          <label label={"brightness"} />
+          <slider
+            value={bind(brightness, "screen")}
+            onChangeValue={(self) => (brightness.screen = self.value)}
+          />
+        </box>
+      </popover>
+    </menubutton>
   );
 }
 
 function Tray() {
   const tray = AstalTray.get_default();
+
   return (
-    <box cssClasses={["Tray-contain"]}>
+    <box cssClasses={["Tray-container"]}>
       {bind(tray, "items").as((items) =>
         items.map((item) => (
-          <menubutton
-            cssClasses={["Tray-item"]}
-            tooltipMarkup={bind(item, "tooltipMarkup")}
-            menuModel={bind(item, "menuModel")}
-            setup={(self) =>
-              hook(self, item, "notify::action-group", () =>
-                self.insert_action_group("dbusmenu", item.action_group),
-              )
-            }
-          >
-            <image gicon={bind(item, "gicon")} />
-          </menubutton>
+          <box cssClasses={["Tray-item"]} hexpand vexpand>
+            <menubutton
+              tooltipMarkup={bind(item, "tooltipMarkup")}
+              setup={(self) => {
+                // Initialize the menu model
+                self.menu_model = item.menu_model || null;
+
+                // Update menu model when it changes
+                const updateMenuModel = () => {
+                  self.menu_model = item.menu_model || null;
+                };
+
+                // Setup action group
+                const updateActionGroup = () => {
+                  self.insert_action_group(
+                    "dbusmenu",
+                    item.action_group || null,
+                  );
+                };
+
+                // Initial setup
+                updateActionGroup();
+
+                // Setup change monitoring
+                hook(self, item, "notify::menu-model", updateMenuModel);
+                hook(self, item, "notify::action-group", updateActionGroup);
+              }}
+            >
+              <image gicon={bind(item, "gicon")} hexpand vexpand />
+            </menubutton>
+          </box>
         )),
       )}
     </box>
@@ -107,7 +140,9 @@ function Clients() {
                 }}
                 tooltipText={bind(client, "title")}
               >
-                <image cssClasses={["Clients-icon"]} iconName={IconName} />
+                <box hexpand vexpand cssClasses={["Clients-icon"]}>
+                  <image iconName={IconName} />
+                </box>
               </button>
             );
           });
@@ -128,20 +163,20 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       anchor={TOP | LEFT | RIGHT}
       application={App}
     >
-      <centerbox cssName="centerbox">
-        <box vexpand hexpand halign={Gtk.Align.START} cssName="Left">
+      <centerbox cssClasses={["centerbox"]}>
+        <box vexpand hexpand halign={Gtk.Align.START} cssClasses={["Left"]}>
           <Workespaces />
           <Clients />
         </box>
-        <box hexpand halign={Gtk.Align.CENTER} cssName="Center">
+        <box hexpand halign={Gtk.Align.CENTER} css_classes={["Center"]}>
           <menubutton hexpand>
             <label label={time()} onDestroy={() => time.drop()} />
-            <popover>
+            <popover hasArrow={false}>
               <Gtk.Calendar />
             </popover>
           </menubutton>
         </box>
-        <box hexpand halign={Gtk.Align.END} cssName="Right">
+        <box hexpand halign={Gtk.Align.END} cssClasses={["Right"]}>
           <Bluetooth />
           <Audio />
           <Tray />
