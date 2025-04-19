@@ -1,44 +1,55 @@
-import GObject, { register, property } from "astal/gobject";
-import { monitorFile, readFileAsync } from "astal/file";
-import { exec, execAsync } from "astal/process";
-
-const get = (args: string) => Number(exec(`brightnessctl ${args}`));
-const screen = exec(`bash -c "ls -w1 /sys/class/backlight | head -1"`);
+import {exec, monitorFile } from "astal"
+import GObject, { register, property , signal } from "astal/gobject"
 
 @register({ GTypeName: "Brightness" })
 export default class Brightness extends GObject.Object {
-  static instance: Brightness;
-  static get_default() {
-    if (!this.instance) this.instance = new Brightness();
-
-    return this.instance;
-  }
-
-  #screenMax = get("max");
-  #screen = get("get") / (get("max") || 1);
+  declare private _value: number
+  declare private _interface: string
+  declare private _max: number
+  declare private _iconName: string
 
   @property(Number)
-  get screen() {
-    return this.#screen;
+  get value() {
+    return this._value;
+  }
+  set value(value: number) {
+    exec(`brightnessctl set ${Math.round(value * this._max)}`);
+    this._value = value;
+    this.emit("value_changed", value);
   }
 
-  set screen(percent) {
-    if (percent < 0) percent = 0.2;
-    if (percent == 0) percent = 0.2;
-    if (percent > 1) percent = 1;
-
-    execAsync(`brightnessctl set ${Math.floor(percent * 100)}% -q`).then(() => {
-      this.#screen = percent;
-      this.notify("screen");
-    });
+  @property(String)
+  get iconName() {
+    if (this._value < 0.25) {
+      return "display-brightness-low-symbolic"
+    } else if (this._value < 0.75) {
+      return "display-brightness-medium-symbolic"
+    } else {
+      return "display-brightness-high-symbolic"
+    }
   }
+
 
   constructor() {
-    super();
-    monitorFile(`/sys/class/backlight/${screen}/brightness`, async (f) => {
-      const v = await readFileAsync(f);
-      this.#screen = Number(v) / this.#screenMax;
-      this.notify("screen");
-    });
+    super()
+    this._interface = exec("sh -c 'ls -w1 /sys/class/backlight | head -1'");
+    this._max = Number(exec('brightnessctl max'));
+    this._value = 0
+    const brightness = `/sys/class/backlight/${this._interface}/brightness`;
+    monitorFile(brightness, () => this.onChange());
+
+    //Init
+    this.onChange();
   }
+
+  onChange() {
+    this._value = Number(exec("brightnessctl get")) / this._max;
+    // Update
+    this.notify("icon-name");
+    this.notify("value");
+    this.emit("value-changed", this._value);
+  }
+
+  @signal(Number)
+  declare valueChanged: (value: Number) => void
 }

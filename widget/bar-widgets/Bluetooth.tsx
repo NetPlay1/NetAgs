@@ -1,8 +1,7 @@
-import { App, Astal, Gtk, Gdk, hook } from "astal/gtk4";
-import { bind, Binding, Variable, GLib, timeout, derive } from "astal";
+import { App, Gtk, Gdk, hook } from "astal/gtk4";
+import { bind, Variable, timeout, derive } from "astal";
 import Icons from "../../utils/icons";
 import AstalBluetooth from "gi://AstalBluetooth";
-import AstalMpris from "gi://AstalMpris";
 import Pango from "gi://Pango";
 function Bluetooth() {
   let bluetooth = AstalBluetooth.get_default();

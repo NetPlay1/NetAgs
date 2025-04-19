@@ -1,5 +1,5 @@
-import { App, Astal, Gtk, Gdk, hook } from "astal/gtk4";
-import { bind, Binding, Variable, GLib } from "astal";
+import { App, Gtk, Gdk, hook } from "astal/gtk4";
+import { bind, Variable, GLib } from "astal";
 import Icons from "../../utils/icons";
 import AstalWp from "gi://AstalWp";
 import AstalMpris from "gi://AstalMpris";

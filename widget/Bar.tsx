@@ -1,5 +1,5 @@
 import { App, Astal, Gtk, Gdk, hook } from "astal/gtk4";
-import { bind, Binding, Variable, GLib, timeout, derive } from "astal";
+import { bind, Variable, GLib, derive } from "astal";
 import AstalTray from "gi://AstalTray";
 import AstalBattery from "gi://AstalBattery";
 import AstalHyprland from "gi://AstalHyprland";
@@ -8,12 +8,13 @@ import Icons from "../utils/icons";
 import Audio from "./bar-widgets/Audio";
 import Brightness from "../utils/brightness";
 import Bluetooth from "./bar-widgets/Bluetooth";
+
 const time = Variable("").poll(1000, "date +'%H:%M - %a'");
 const Applications = AstalApps.Apps.new();
 
 function Battery() {
   const battery = AstalBattery.get_default();
-  const brightness = Brightness.get_default();
+  const brightness = new Brightness();
 
   return (
     <menubutton>
@@ -32,13 +33,20 @@ function Battery() {
           )}
         />
       </box>
-      <popover>
+      <popover hasArrow={false} widthRequest={200}>
         <box vertical>
           <label label={"brightness"} />
-          <slider
-            value={bind(brightness, "screen")}
-            onChangeValue={(self) => (brightness.screen = self.value)}
-          />
+          <box>
+            <slider
+              hexpand
+              drawValue={false}
+              value={bind(brightness, "value")}
+              onValueChanged={(self) => (brightness.value = self.value)}
+              tooltipText={bind(brightness, "value").as(
+                (val) => `${Math.floor(val * 100)}%`,
+              )}
+            />
+          </box>
         </box>
       </popover>
     </menubutton>
@@ -181,7 +189,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           <Audio />
           <Tray />
           <Battery />
-          {/* <QuickSettings /> */}
         </box>
       </centerbox>
     </window>

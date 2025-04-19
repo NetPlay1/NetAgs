@@ -1,5 +1,5 @@
 import { App, Astal, Gtk, Gdk, hook } from "astal/gtk4";
-import { bind, Binding, execAsync, Variable } from "astal";
+import { bind, execAsync, Variable } from "astal";
 import AstalApps from "gi://AstalApps";
 
 const Apps = new AstalApps.Apps({
